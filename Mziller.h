@@ -21,77 +21,19 @@ AfxMessageBox(str);
 class Mziller
 {
 public:
-	void GetProcessCursor(HWND processHANDLE, int& x, int& y)
+	POINT GetProcessCursor(HWND windowsHANDLE)
 	{
 		POINT p;
 		GetCursorPos(&p);
-		::ScreenToClient(processHANDLE, &p);
-		x = p.x, y = p.y;
+		::ScreenToClient(windowsHANDLE, &p);
+		return { p.x,p.y };
 	}
-	void MovetoProcess(HWND processHANDLE, int x, int y)
+	void SetProcessCursor(HWND windowsHANDLE, int x, int y)
 	{
 		POINT p;
 		p.x = x, p.y = y;
-		::ClientToScreen(processHANDLE, &p);
+		::ClientToScreen(windowsHANDLE, &p);
 		SetCursorPos(p.x, p.y);
-	}
-	DWORD keycode(const char* key)
-	{
-		int pkey = 0;
-		int temp = 0;
-		if (key[1] == '\0')
-		{
-			temp = (int)key[0];
-			if (temp >= 97 && temp <= 122)pkey = temp - 32;
-			if (temp >= 48 && temp <= 57)pkey = temp;
-			if (temp >= 42 && temp <= 47 && temp != 44)pkey = temp + 64;
-		}
-		else if (key[4] == '\0' && key[0] == 'n' && key[1] == 'u' && key[2] == 'm')
-		{
-			temp = (int)key[3];
-			if (temp >= 48 && temp <= 57)pkey = temp + 48;
-		}
-		else if (key[2] == '\0' && (key[0] == 'F' || key[0] == 'f'))
-		{
-			temp = (int)key[1];
-			if (temp >= 49 && temp <= 57)pkey = temp + 63;
-		}
-		else if (key[3] == '\0' && (key[0] == 'F' || key[0] == 'f') && key[1] == '1')
-		{
-			temp = (int)key[2];
-			if (temp >= 48 && temp <= 50)pkey = temp + 73;
-		}
-		else if (key == "numenter" || key == "NumEnter")pkey = 108;
-		else if (key == "backspace" || key == "Backspace")pkey = 8;
-		else if (key == "tab" || key == "Tab")pkey = 9;
-		else if (key == "enter" || key == "Enter")pkey = 13;
-		else if (key == "shift" || key == "Shift")pkey = 16;
-		else if (key == "ctrl" || key == "control" || key == "Control" || key == "Ctrl") pkey = 17;
-		else if (key == "alt" || key == "Alt") pkey = 18;
-		else if (key == "caps" || key == "Caps") pkey = 20;
-		else if (key == "Esc" || key == "esc") pkey = 27;
-		else if (key == "space" || key == "Space") pkey == 32;
-		else if (key == "pgup" || key == "pageup" || key == "Pgup" || key == "PageUp") pkey = 33;
-		else if (key == "pgdn" || key == "pagedown" || key == "Pgdn" || key == "PageDown") pkey = 34;
-		else if (key == "end" || key == "End") pkey = 35;
-		else if (key == "Home" || key == "home") pkey = 36;
-		else if (key == "left" || key == "Left") pkey = 37;
-		else if (key == "up" || key == "Up") pkey = 38;
-		else if (key == "right" || key == "Right") pkey = 39;
-		else if (key == "down" || key == "Down" || key == "dn") pkey = 40;
-		else if (key == "insert" || key == "Insert") pkey = 45;
-		else if (key == "delete" || key == "Delete" || key == "Del" || key == "del") pkey = 46;
-		else if (key == "numlock" || key == "Numlock" || key == "NumLock" || key == "numLock") pkey = 144;
-		else
-		{
-			return -1;
-		}
-		return (DWORD)pkey;
-	}
-	BYTE scan_code(DWORD pKey)
-	{
-		const DWORD result = MapVirtualKey(pKey, MAPVK_VK_TO_VSC);
-		return (BYTE)result;
 	}
 	void press_key(DWORD pKey)
 	{
@@ -418,5 +360,64 @@ public:
 
 		charstar[str_len] = '\0';
 		return charstar;
+	}
+private:
+	BYTE scan_code(DWORD pKey)
+	{
+		const DWORD result = MapVirtualKey(pKey, MAPVK_VK_TO_VSC);
+		return (BYTE)result;
+	}
+	DWORD keycode(const char* key)
+	{
+		int pkey = 0;
+		int temp = 0;
+		if (key[1] == '\0')
+		{
+			temp = (int)key[0];
+			if (temp >= 97 && temp <= 122)pkey = temp - 32;
+			if (temp >= 48 && temp <= 57)pkey = temp;
+			if (temp >= 42 && temp <= 47 && temp != 44)pkey = temp + 64;
+		}
+		else if (key[4] == '\0' && key[0] == 'n' && key[1] == 'u' && key[2] == 'm')
+		{
+			temp = (int)key[3];
+			if (temp >= 48 && temp <= 57)pkey = temp + 48;
+		}
+		else if (key[2] == '\0' && (key[0] == 'F' || key[0] == 'f'))
+		{
+			temp = (int)key[1];
+			if (temp >= 49 && temp <= 57)pkey = temp + 63;
+		}
+		else if (key[3] == '\0' && (key[0] == 'F' || key[0] == 'f') && key[1] == '1')
+		{
+			temp = (int)key[2];
+			if (temp >= 48 && temp <= 50)pkey = temp + 73;
+		}
+		else if (key == "numenter" || key == "NumEnter")pkey = 108;
+		else if (key == "backspace" || key == "Backspace")pkey = 8;
+		else if (key == "tab" || key == "Tab")pkey = 9;
+		else if (key == "enter" || key == "Enter")pkey = 13;
+		else if (key == "shift" || key == "Shift")pkey = 16;
+		else if (key == "ctrl" || key == "control" || key == "Control" || key == "Ctrl") pkey = 17;
+		else if (key == "alt" || key == "Alt") pkey = 18;
+		else if (key == "caps" || key == "Caps") pkey = 20;
+		else if (key == "Esc" || key == "esc") pkey = 27;
+		else if (key == "space" || key == "Space") pkey == 32;
+		else if (key == "pgup" || key == "pageup" || key == "Pgup" || key == "PageUp") pkey = 33;
+		else if (key == "pgdn" || key == "pagedown" || key == "Pgdn" || key == "PageDown") pkey = 34;
+		else if (key == "end" || key == "End") pkey = 35;
+		else if (key == "Home" || key == "home") pkey = 36;
+		else if (key == "left" || key == "Left") pkey = 37;
+		else if (key == "up" || key == "Up") pkey = 38;
+		else if (key == "right" || key == "Right") pkey = 39;
+		else if (key == "down" || key == "Down" || key == "dn") pkey = 40;
+		else if (key == "insert" || key == "Insert") pkey = 45;
+		else if (key == "delete" || key == "Delete" || key == "Del" || key == "del") pkey = 46;
+		else if (key == "numlock" || key == "Numlock" || key == "NumLock" || key == "numLock") pkey = 144;
+		else
+		{
+			return -1;
+		}
+		return (DWORD)pkey;
 	}
 };

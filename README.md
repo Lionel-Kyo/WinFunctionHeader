@@ -14,21 +14,21 @@ or
 
 For using the memory function you should also declare some globle variable by
 
-	HWND g_windowsHANDLE;
+	HWND g_Hwnd;
 	HANDLE g_processHANDLE;
 	DWORD g_pid;
 
 For finding the windows handle you can find it by the windows' name
 
-	g_windowsHANDLE = FindWindow(CString("Minesweeper"), CString("Minesweeper"));
+	g_Hwnd = FindWindow(L"Minesweeper"), L"Minesweeper");
 	
 Or find it by the mousepoint 
 
-	g_windowsHANDLE = mz.GetMousePointWindow()
+	g_Hwnd = mz.GetMousePointWindow()
 
 Find the ProcessID by
 
-	GetWindowThreadProcessId(g_windowsHANDLE, &g_pid);
+	GetWindowThreadProcessId(g_Hwnd, &g_pid);
 	
 Find the Process Handle by
 

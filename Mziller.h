@@ -35,6 +35,17 @@ public:
 		::ClientToScreen(windowsHANDLE, &p);
 		SetCursorPos(p.x, p.y);
 	}
+	void SetProcessCursor_mouse(HWND windowsHANDLE, int x, int y)
+	{
+		POINT p;
+		p.x = x, p.y = y;
+		::ClientToScreen(windowsHANDLE, &p);
+		RECT desktop;
+		const HWND hDesktop = GetDesktopWindow();
+		GetWindowRect(hDesktop, &desktop);
+		mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, dx(p.x, desktop), dy(p.y, desktop), 0, 0);
+		mouse_event(MOUSEEVENTF_LEFTUP | MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, dx(p.x, desktop), dy(p.y, desktop), 0, 0);
+	}
 	void press_key(DWORD pKey)
 	{
 		keybd_event((BYTE)pKey, scan_code(pKey), 0, 0);
@@ -419,5 +430,16 @@ private:
 			return -1;
 		}
 		return (DWORD)pkey;
+	}
+	int dx(int p_x, RECT desktop)
+	{
+		float x = p_x * (65536.0 / desktop.right);
+		return int(x);
+	}
+
+	int dy(int p_y, RECT desktop)
+	{
+		float y = p_y * (65536.0 / desktop.bottom);
+		return int(y);
 	}
 };

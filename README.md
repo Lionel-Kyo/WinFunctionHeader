@@ -20,7 +20,7 @@ For using the memory function you should also declare some globle variable by
 
 For finding the windows handle you can find it by the windows' name
 
-	g_Hwnd = FindWindow(L"Minesweeper"), L"Minesweeper");
+	g_Hwnd = ::FindWindow(L"ClassName", L"WindowsName");
 	
 Or find it by the mousepoint 
 

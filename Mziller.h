@@ -21,25 +21,25 @@ AfxMessageBox(str);
 class Mziller
 {
 public:
-	POINT GetProcessCursor(HWND windowsHANDLE)
+	POINT GetProcessCursor(HWND Hwnd)
 	{
 		POINT p;
 		GetCursorPos(&p);
-		::ScreenToClient(windowsHANDLE, &p);
+		::ScreenToClient(Hwnd, &p);
 		return { p.x,p.y };
 	}
-	void SetProcessCursor(HWND windowsHANDLE, int x, int y)
+	void SetProcessCursor(HWND Hwnd, int x, int y)
 	{
 		POINT p;
 		p.x = x, p.y = y;
-		::ClientToScreen(windowsHANDLE, &p);
+		::ClientToScreen(Hwnd, &p);
 		SetCursorPos(p.x, p.y);
 	}
-	void SetProcessCursor_mouse(HWND windowsHANDLE, int x, int y)
+	void SetProcessCursor_mouse(HWND Hwnd, int x, int y)
 	{
 		POINT p;
 		p.x = x, p.y = y;
-		::ClientToScreen(windowsHANDLE, &p);
+		::ClientToScreen(Hwnd, &p);
 		RECT desktop;
 		const HWND hDesktop = GetDesktopWindow();
 		GetWindowRect(hDesktop, &desktop);
@@ -413,7 +413,7 @@ private:
 		else if (key == "alt" || key == "Alt") pkey = 18;
 		else if (key == "caps" || key == "Caps") pkey = 20;
 		else if (key == "Esc" || key == "esc") pkey = 27;
-		else if (key == "space" || key == "Space") pkey == 32;
+		else if (key == "space" || key == "Space") pkey = 32;
 		else if (key == "pgup" || key == "pageup" || key == "Pgup" || key == "PageUp") pkey = 33;
 		else if (key == "pgdn" || key == "pagedown" || key == "Pgdn" || key == "PageDown") pkey = 34;
 		else if (key == "end" || key == "End") pkey = 35;

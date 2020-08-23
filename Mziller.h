@@ -54,14 +54,14 @@ public:
 	{
 		keybd_event((BYTE)pKey, scan_code(pKey), KEYEVENTF_KEYUP, 0);
 	}
-	void press_key(const char* key)
-	{
-		press_key(keycode(key));
-	}
-	void release_key(const char* key)
-	{
-		release_key(keycode(key));
-	}
+	//void press_key(const char* key)
+	//{
+	//	press_key(keycode(key));
+	//}
+	//void release_key(const char* key)
+	//{
+	//	release_key(keycode(key));
+	//}
 	void MouseLeftClick(int times, int updowndelay,int delay)
 	{
 		for (int k = 0; k < times; k++)
@@ -304,8 +304,8 @@ public:
 	}
 	DWORD Cstr_dw(CString Cstr_x)
 	{
-		long long_x = _ttol(Cstr_x);  //CString to char*
-		DWORD DWORD_x = (DWORD)long_x; // char* to DWORD
+		long long_x = _ttol(Cstr_x);  //CString to long
+		DWORD DWORD_x = (DWORD)long_x; // long to DWORD
 		return DWORD_x;
 	}
 	CString dw_Cstr(DWORD dw_x)
@@ -332,7 +332,7 @@ public:
 
 	string Cstr_str(CString cstr)
 	{
-		string str(cstr.GetLength(), 'e');
+		string str(cstr.GetLength(), 'a');
 		for (int k = 0; k < cstr.GetLength(); k++)
 		{
 			str[k] = (char)cstr[k];
@@ -342,10 +342,11 @@ public:
 	CString str_Cstr(string str)
 	{
 		CString cstr;
-		for (int k = 0; k < (int)str.length(); k++)
-		{
-			cstr += str[k];
-		}
+		//for (int k = 0; k < (int)str.length(); k++)
+		//{
+		//	cstr += str[k];
+		//}
+		cstr.Format(L"%s", str);
 		return cstr;
 	}
 	string charp_str(char* charstar, int count)
@@ -353,24 +354,23 @@ public:
 		string str(charstar, count);
 		return str;
 	}
-	char* charp_str(string& str)
-
+	char* str_charp(string str)
 	{
-
-		int str_len = str.length();
-
-		char* charstar = new char[str_len + 1];
-
-		for (int k = 0; k < str_len; k++)
-
-		{
-
-			charstar[k] = str[k];
-
-		}
-
-		charstar[str_len] = '\0';
-		return charstar;
+		//int str_len = str.length();
+		//char* charstar = new char[str_len + 1];
+		//for (int k = 0; k < str_len; k++)
+		//{
+		//	charstar[k] = str[k];
+		//}
+		//charstar[str_len] = '\0';
+		char* charp = (char*)str.c_str();
+		return charp;
+	}
+	char* Cstr_charp(CString cstr)
+	{
+		string str = Cstr_str(cstr);
+		char* charp = (char*)str.c_str();
+		return charp;
 	}
 private:
 	BYTE scan_code(DWORD pKey)
@@ -378,59 +378,59 @@ private:
 		const DWORD result = MapVirtualKey(pKey, MAPVK_VK_TO_VSC);
 		return (BYTE)result;
 	}
-	DWORD keycode(const char* key)
-	{
-		int pkey = 0;
-		int temp = 0;
-		if (key[1] == '\0')
-		{
-			temp = (int)key[0];
-			if (temp >= 97 && temp <= 122)pkey = temp - 32;
-			if (temp >= 48 && temp <= 57)pkey = temp;
-			if (temp >= 42 && temp <= 47 && temp != 44)pkey = temp + 64;
-		}
-		else if (key[4] == '\0' && key[0] == 'n' && key[1] == 'u' && key[2] == 'm')
-		{
-			temp = (int)key[3];
-			if (temp >= 48 && temp <= 57)pkey = temp + 48;
-		}
-		else if (key[2] == '\0' && (key[0] == 'F' || key[0] == 'f'))
-		{
-			temp = (int)key[1];
-			if (temp >= 49 && temp <= 57)pkey = temp + 63;
-		}
-		else if (key[3] == '\0' && (key[0] == 'F' || key[0] == 'f') && key[1] == '1')
-		{
-			temp = (int)key[2];
-			if (temp >= 48 && temp <= 50)pkey = temp + 73;
-		}
-		else if (key == "numenter" || key == "NumEnter")pkey = 108;
-		else if (key == "backspace" || key == "Backspace")pkey = 8;
-		else if (key == "tab" || key == "Tab")pkey = 9;
-		else if (key == "enter" || key == "Enter")pkey = 13;
-		else if (key == "shift" || key == "Shift")pkey = 16;
-		else if (key == "ctrl" || key == "control" || key == "Control" || key == "Ctrl") pkey = 17;
-		else if (key == "alt" || key == "Alt") pkey = 18;
-		else if (key == "caps" || key == "Caps") pkey = 20;
-		else if (key == "Esc" || key == "esc") pkey = 27;
-		else if (key == "space" || key == "Space") pkey = 32;
-		else if (key == "pgup" || key == "pageup" || key == "Pgup" || key == "PageUp") pkey = 33;
-		else if (key == "pgdn" || key == "pagedown" || key == "Pgdn" || key == "PageDown") pkey = 34;
-		else if (key == "end" || key == "End") pkey = 35;
-		else if (key == "Home" || key == "home") pkey = 36;
-		else if (key == "left" || key == "Left") pkey = 37;
-		else if (key == "up" || key == "Up") pkey = 38;
-		else if (key == "right" || key == "Right") pkey = 39;
-		else if (key == "down" || key == "Down" || key == "dn") pkey = 40;
-		else if (key == "insert" || key == "Insert") pkey = 45;
-		else if (key == "delete" || key == "Delete" || key == "Del" || key == "del") pkey = 46;
-		else if (key == "numlock" || key == "Numlock" || key == "NumLock" || key == "numLock") pkey = 144;
-		else
-		{
-			return -1;
-		}
-		return (DWORD)pkey;
-	}
+	//DWORD keycode(const char* key)
+	//{
+	//	int pkey = 0;
+	//	int temp = 0;
+	//	if (key[1] == '\0')
+	//	{
+	//		temp = (int)key[0];
+	//		if (temp >= 97 && temp <= 122)pkey = temp - 32;
+	//		if (temp >= 48 && temp <= 57)pkey = temp;
+	//		if (temp >= 42 && temp <= 47 && temp != 44)pkey = temp + 64;
+	//	}
+	//	else if (key[4] == '\0' && key[0] == 'n' && key[1] == 'u' && key[2] == 'm')
+	//	{
+	//		temp = (int)key[3];
+	//		if (temp >= 48 && temp <= 57)pkey = temp + 48;
+	//	}
+	//	else if (key[2] == '\0' && (key[0] == 'F' || key[0] == 'f'))
+	//	{
+	//		temp = (int)key[1];
+	//		if (temp >= 49 && temp <= 57)pkey = temp + 63;
+	//	}
+	//	else if (key[3] == '\0' && (key[0] == 'F' || key[0] == 'f') && key[1] == '1')
+	//	{
+	//		temp = (int)key[2];
+	//		if (temp >= 48 && temp <= 50)pkey = temp + 73;
+	//	}
+	//	else if (key == "numenter" || key == "NumEnter")pkey = 108;
+	//	else if (key == "backspace" || key == "Backspace")pkey = 8;
+	//	else if (key == "tab" || key == "Tab")pkey = 9;
+	//	else if (key == "enter" || key == "Enter")pkey = 13;
+	//	else if (key == "shift" || key == "Shift")pkey = 16;
+	//	else if (key == "ctrl" || key == "control" || key == "Control" || key == "Ctrl") pkey = 17;
+	//	else if (key == "alt" || key == "Alt") pkey = 18;
+	//	else if (key == "caps" || key == "Caps") pkey = 20;
+	//	else if (key == "Esc" || key == "esc") pkey = 27;
+	//	else if (key == "space" || key == "Space") pkey = 32;
+	//	else if (key == "pgup" || key == "pageup" || key == "Pgup" || key == "PageUp") pkey = 33;
+	//	else if (key == "pgdn" || key == "pagedown" || key == "Pgdn" || key == "PageDown") pkey = 34;
+	//	else if (key == "end" || key == "End") pkey = 35;
+	//	else if (key == "Home" || key == "home") pkey = 36;
+	//	else if (key == "left" || key == "Left") pkey = 37;
+	//	else if (key == "up" || key == "Up") pkey = 38;
+	//	else if (key == "right" || key == "Right") pkey = 39;
+	//	else if (key == "down" || key == "Down" || key == "dn") pkey = 40;
+	//	else if (key == "insert" || key == "Insert") pkey = 45;
+	//	else if (key == "delete" || key == "Delete" || key == "Del" || key == "del") pkey = 46;
+	//	else if (key == "numlock" || key == "Numlock" || key == "NumLock" || key == "numLock") pkey = 144;
+	//	else
+	//	{
+	//		return -1;
+	//	}
+	//	return (DWORD)pkey;
+	//}
 	int dx(int p_x, RECT desktop)
 	{
 		float x = p_x * (65536.0 / desktop.right);

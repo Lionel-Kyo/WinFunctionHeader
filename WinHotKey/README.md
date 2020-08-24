@@ -10,32 +10,32 @@ In SwitchHotkey can passes int open_key, int off_key, running void function, bre
 
 Hotkey can be created by:
 
-SwitchHotkey* switchhotkey = new SwitchHotkey(97, []()
-		{
-			//script
-		}, []()
-		{
-			return (bool)g_dlg->m_NumpadCheck.GetCheck();
-		});
+	SwitchHotkey* switchhotkey = new SwitchHotkey(97, []()
+			{
+				//script
+			}, []()
+			{
+				return (bool)g_dlg->m_NumpadCheck.GetCheck();
+			});
 
 or
 
-void running()
-{
-	sleep(25);
-}
+	void running()
+	{
+		sleep(25);
+	}
+	
+	bool break()
+	{
+		return (bool)g_dlg->m_NumpadCheck.GetCheck();
+	}
 
-bool break()
-{
-	return (bool)g_dlg->m_NumpadCheck.GetCheck();
-}
 
-
-OnceHotKey* oncehotkey = new OnceHotKey(97, running, break)
+	OnceHotKey* oncehotkey = new OnceHotKey(97, running, break)
 
 For running turn on the hotkey check just use:
 
-switchhotkey->run();
-or
-oncehotkey->run();
+	switchhotkey->run();
+	or
+	oncehotkey->run();
 	

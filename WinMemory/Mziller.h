@@ -517,11 +517,11 @@ public:
 	CString str_Cstr(string str)
 	{
 		CString cstr;
-		//for (int k = 0; k < (int)str.length(); k++)
-		//{
-		//	cstr += str[k];
-		//}
-		cstr.Format(L"%s", str);
+		for (int k = 0; k < (int)str.length(); k++)
+		{
+			cstr += str[k];
+		}
+		//cstr.Format(_T("%s"), str);
 		return cstr;
 	}
 	string charp_str(char* charstar, int count)
@@ -531,20 +531,20 @@ public:
 	}
 	char* str_charp(string str)
 	{
-		//int str_len = str.length();
-		//char* charstar = new char[str_len + 1];
-		//for (int k = 0; k < str_len; k++)
-		//{
-		//	charstar[k] = str[k];
-		//}
-		//charstar[str_len] = '\0';
-		char* charp = (char*)str.c_str();
+		int str_len = str.length();
+		char* charp = new char[str_len + 1];
+		for (int k = 0; k < str_len; k++)
+		{
+			charp[k] = str[k];
+		}
+		charp[str_len] = '\0';
+		//char* charp = (char*)str.c_str();
 		return charp;
 	}
 	char* Cstr_charp(CString cstr)
 	{
 		string str = Cstr_str(cstr);
-		char* charp = (char*)str.c_str();
+		char* charp = str_charp(str);
 		return charp;
 	}
 private:

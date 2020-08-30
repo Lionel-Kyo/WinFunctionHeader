@@ -21,6 +21,189 @@ AfxMessageBox(str);
 class Mziller
 {
 public:
+	void outputText(string text)
+	{
+		for (int n = 0; n < text.length(); n++)
+		{
+			BYTE scan_code, scan_shift;
+			DWORD vk = text[n];
+			bool shift = false;
+			if (vk >= 97 && vk <= 122) vk -= 32;
+			else if (vk >= 65 && vk <= 90)shift = true;
+			else if (vk == 45)vk = VK_OEM_MINUS;
+			else if (vk == 61)vk = VK_OEM_PLUS;
+			else if (vk == 91)vk = VK_OEM_4;
+			else if (vk == 93)vk = VK_OEM_6;
+			else if (vk == 92)vk = VK_OEM_5;
+			else if (vk == 59)vk = VK_OEM_1;
+			else if (vk == 39)vk = VK_OEM_7;
+			else if (vk == 44)vk = VK_OEM_COMMA;
+			else if (vk == 46)vk = VK_OEM_PERIOD;
+			else if (vk == 47)vk = VK_OEM_2;
+			else if (vk == 96)vk = VK_OEM_3;
+			else if (vk == 33)
+			{
+				vk = '1';
+				shift = true;
+			}
+			else if (vk == 64)
+			{
+				vk = '2';
+				shift = true;
+			}
+			else if (vk == 35)
+			{
+				vk = '3';
+				shift = true;
+			}
+			else if (vk == 36)
+			{
+				vk = '4';
+				shift = true;
+			}
+			else if (vk == 37)
+			{
+				vk = '5';
+				shift = true;
+			}
+			else if (vk == 94)
+			{
+				vk = '6';
+				shift = true;
+			}
+			else if (vk == 38)
+			{
+				vk = '7';
+				shift = true;
+			}
+			else if (vk == 42)
+			{
+				vk = '8';
+				shift = true;
+			}
+			else if (vk == 40)
+			{
+				vk = '9';
+				shift = true;
+			}
+			else if (vk == 41)
+			{
+				vk = '0';
+				shift = true;
+			}
+			else if (vk == 95)
+			{
+				vk = VK_OEM_MINUS;
+				shift = true;
+			}
+			else if (vk == 43)
+			{
+				vk = VK_OEM_PLUS;
+				shift = true;
+			}
+			else if (vk == 123)
+			{
+				vk = VK_OEM_4;
+				shift = true;
+			}
+			else if (vk == 125)
+			{
+				vk = VK_OEM_6;
+				shift = true;
+			}
+			else if (vk == 124)
+			{
+				vk = VK_OEM_5;
+				shift = true;
+			}
+			else if (vk == 58)
+			{
+				vk = VK_OEM_1;
+				shift = true;
+			}
+			else if (vk == 34)
+			{
+				vk = VK_OEM_7;
+				shift = true;
+			}
+			else if (vk == 60)
+			{
+				vk = VK_OEM_COMMA;
+				shift = true;
+			}
+			else if (vk == 62)
+			{
+				vk = VK_OEM_PERIOD;
+				shift = true;
+			}
+			else if (vk == 63)
+			{
+				vk = VK_OEM_2;
+				shift = true;
+			}
+			else if (vk == 126)
+			{
+				vk = VK_OEM_3;
+				shift = true;
+			}
+			if (shift)
+			{
+				scan_shift = (BYTE)MapVirtualKey(VK_LSHIFT, MAPVK_VK_TO_VSC);
+				keybd_event((BYTE)VK_LSHIFT, scan_shift, 0, 0);
+			}
+			scan_code = (BYTE)MapVirtualKey(vk, MAPVK_VK_TO_VSC);
+			keybd_event((BYTE)vk, scan_code, 0, 0);
+			keybd_event((BYTE)vk, scan_code, KEYEVENTF_KEYUP, 0);
+			if (shift)keybd_event((BYTE)VK_LSHIFT, scan_shift, KEYEVENTF_KEYUP, 0);
+		}
+	}
+	void SetClipboard(std::string text)
+	{
+		HWND hWnd = GetClipboardOwner();
+
+		if (!OpenClipboard(hWnd))
+		{
+			return;
+		}
+
+		HGLOBAL pClipData;
+		pClipData = GlobalAlloc(GHND, text.length() + 1);
+
+
+		char* pData;
+		pData = (char*)GlobalLock(pClipData);
+		for (int i = 0; i < text.length(); i++)
+		{
+			pData[i] = text[i];
+		}
+
+
+		GlobalUnlock(pClipData);
+
+		EmptyClipboard();
+		SetClipboardData(CF_TEXT, pClipData);
+		CloseClipboard();
+	}
+
+	void PrintClipboard()
+	{
+		HWND hWnd = GetClipboardOwner();
+
+		if (!OpenClipboard(hWnd))
+		{
+			return;
+		}
+
+		if (IsClipboardFormatAvailable(CF_TEXT))
+		{
+			HANDLE hCilpData = GetClipboardData(CF_TEXT);
+			char* pData;
+			pData = (char*)GlobalLock(hCilpData);
+			printf("Clipboard：%s", pData);
+			GlobalUnlock(hCilpData);
+		}
+		CloseClipboard();
+	}
 	POINT GetProcessCursor(HWND Hwnd)
 	{
 		POINT p;
@@ -54,14 +237,6 @@ public:
 	{
 		keybd_event((BYTE)pKey, scan_code(pKey), KEYEVENTF_KEYUP, 0);
 	}
-	//void press_key(const char* key)
-	//{
-	//	press_key(keycode(key));
-	//}
-	//void release_key(const char* key)
-	//{
-	//	release_key(keycode(key));
-	//}
 	void MouseLeftClick(int times, int updowndelay,int delay)
 	{
 		for (int k = 0; k < times; k++)
@@ -378,68 +553,15 @@ private:
 		const DWORD result = MapVirtualKey(pKey, MAPVK_VK_TO_VSC);
 		return (BYTE)result;
 	}
-	//DWORD keycode(const char* key)
-	//{
-	//	int pkey = 0;
-	//	int temp = 0;
-	//	if (key[1] == '\0')
-	//	{
-	//		temp = (int)key[0];
-	//		if (temp >= 97 && temp <= 122)pkey = temp - 32;
-	//		if (temp >= 48 && temp <= 57)pkey = temp;
-	//		if (temp >= 42 && temp <= 47 && temp != 44)pkey = temp + 64;
-	//	}
-	//	else if (key[4] == '\0' && key[0] == 'n' && key[1] == 'u' && key[2] == 'm')
-	//	{
-	//		temp = (int)key[3];
-	//		if (temp >= 48 && temp <= 57)pkey = temp + 48;
-	//	}
-	//	else if (key[2] == '\0' && (key[0] == 'F' || key[0] == 'f'))
-	//	{
-	//		temp = (int)key[1];
-	//		if (temp >= 49 && temp <= 57)pkey = temp + 63;
-	//	}
-	//	else if (key[3] == '\0' && (key[0] == 'F' || key[0] == 'f') && key[1] == '1')
-	//	{
-	//		temp = (int)key[2];
-	//		if (temp >= 48 && temp <= 50)pkey = temp + 73;
-	//	}
-	//	else if (key == "numenter" || key == "NumEnter")pkey = 108;
-	//	else if (key == "backspace" || key == "Backspace")pkey = 8;
-	//	else if (key == "tab" || key == "Tab")pkey = 9;
-	//	else if (key == "enter" || key == "Enter")pkey = 13;
-	//	else if (key == "shift" || key == "Shift")pkey = 16;
-	//	else if (key == "ctrl" || key == "control" || key == "Control" || key == "Ctrl") pkey = 17;
-	//	else if (key == "alt" || key == "Alt") pkey = 18;
-	//	else if (key == "caps" || key == "Caps") pkey = 20;
-	//	else if (key == "Esc" || key == "esc") pkey = 27;
-	//	else if (key == "space" || key == "Space") pkey = 32;
-	//	else if (key == "pgup" || key == "pageup" || key == "Pgup" || key == "PageUp") pkey = 33;
-	//	else if (key == "pgdn" || key == "pagedown" || key == "Pgdn" || key == "PageDown") pkey = 34;
-	//	else if (key == "end" || key == "End") pkey = 35;
-	//	else if (key == "Home" || key == "home") pkey = 36;
-	//	else if (key == "left" || key == "Left") pkey = 37;
-	//	else if (key == "up" || key == "Up") pkey = 38;
-	//	else if (key == "right" || key == "Right") pkey = 39;
-	//	else if (key == "down" || key == "Down" || key == "dn") pkey = 40;
-	//	else if (key == "insert" || key == "Insert") pkey = 45;
-	//	else if (key == "delete" || key == "Delete" || key == "Del" || key == "del") pkey = 46;
-	//	else if (key == "numlock" || key == "Numlock" || key == "NumLock" || key == "numLock") pkey = 144;
-	//	else
-	//	{
-	//		return -1;
-	//	}
-	//	return (DWORD)pkey;
-	//}
 	int dx(int p_x, RECT desktop)
 	{
-		float x = p_x * (65536.0 / desktop.right);
+		double x = p_x * (65536.0 / desktop.right);
 		return int(x);
 	}
 
 	int dy(int p_y, RECT desktop)
 	{
-		float y = p_y * (65536.0 / desktop.bottom);
+		double y = p_y * (65536.0 / desktop.bottom);
 		return int(y);
 	}
 };

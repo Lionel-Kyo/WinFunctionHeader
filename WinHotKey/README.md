@@ -1,6 +1,9 @@
 # WinHotkeyHeader
 
-You should include this header to your C++ Project by
+Link of example:
+https://github.com/LionelC-Kz/CSO-Hotkey
+
+This header should be included to your C++ Project by
 
 	#inclde "Hotkey.h"
 	
@@ -12,7 +15,7 @@ Hotkey can be created by:
 
 	SwitchHotkey* switchhotkey = new SwitchHotkey(97, []()
 			{
-				//script
+				//input your script
 			}, []()
 			{
 				return (bool)g_dlg->m_NumpadCheck.GetCheck();
@@ -22,7 +25,7 @@ or
 
 	void running()
 	{
-		sleep(25);
+		//input your script
 	}
 	
 	bool break()

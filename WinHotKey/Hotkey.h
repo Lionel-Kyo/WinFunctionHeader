@@ -20,6 +20,8 @@ public:
 		key.key1 = KEY;
 		key.key2 = -1;
 		key.Getcheck = GETCHECK;
+		RHF = 0;
+		CH = 0;
 	}
 	SwitchHotkey(int KEY1, int KEY2, void(*HOTKEYFUNCTION)(), bool(*GETCHECK)())
 	{
@@ -28,10 +30,15 @@ public:
 		key.key1 = KEY1;
 		key.key2 = KEY2;
 		key.Getcheck = GETCHECK;
+		RHF = 0;
+		CH = 0;
 	}
 	~SwitchHotkey()
 	{
 		key.status = - 1;
+		BYTE result = (BYTE)MapVirtualKey(key.key1, MAPVK_VK_TO_VSC);
+		keybd_event((BYTE)(key.key1), result, 0, 0);
+		keybd_event((BYTE)(key.key1), result, KEYEVENTF_KEYUP, 0);
 		CloseHandle(RHF);
 		CloseHandle(CH);
 	}
@@ -123,7 +130,7 @@ private:
 				while (GetMessage(&msg, NULL, 0, 0) != 0)
 				{
 					if (!key->Getcheck())break;
-					if (msg.message == WM_HOTKEY && GetAsyncKeyState(key->key1))
+					if (msg.message == WM_HOTKEY && (GetAsyncKeyState(key->key1) || GetAsyncKeyState(key->key2)))
 					{
 						switch (msg.wParam)
 						{
@@ -165,9 +172,13 @@ public:
 		key.key1 = KEY;
 		key.key2 = -1;
 		key.Getcheck = GETCHECK;
+		RHF = 0;
 	}
 	~OnceHotkey()
 	{
+		BYTE result = (BYTE)MapVirtualKey(key.key1, MAPVK_VK_TO_VSC);
+		keybd_event((BYTE)(key.key1), result, 0, 0);
+		keybd_event((BYTE)(key.key1), result, KEYEVENTF_KEYUP, 0);
 		CloseHandle(RHF);
 	}
 	void run()
@@ -229,9 +240,13 @@ public:
 		key.key1 = KEY;
 		key.key2 = -1;
 		key.Getcheck = GETCHECK;
+		RHF = 0;
 	}
 	~ContinuousHotkey()
 	{
+		BYTE result = (BYTE)MapVirtualKey(key.key1, MAPVK_VK_TO_VSC);
+		keybd_event((BYTE)(key.key1), result, 0, 0);
+		keybd_event((BYTE)(key.key1), result, KEYEVENTF_KEYUP, 0);
 		CloseHandle(RHF);
 	}
 	void run()
@@ -270,7 +285,7 @@ private:
 					}
 				}
 			}
-			if (key->Getcheck())
+			if (!key->Getcheck())
 			{
 				UnregisterHotKey(hConsole, 1);
 				UnregisterHotKey(hConsole, 2);

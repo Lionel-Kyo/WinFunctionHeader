@@ -1,7 +1,13 @@
 #pragma once
 #include <Windows.h>
 
-struct _Hotkey_sturct
+
+#define SwitchHotkeySingle 1
+#define SwitchHotkeyDual 2
+#define ContinuousHotkey 3
+#define OnceHotkey 4
+
+struct _Hotkey_struct
 {
 	int status;
 	int key1;
@@ -10,20 +16,10 @@ struct _Hotkey_sturct
 	void(*HotKeyfuntion)();
 };
 
-class SwitchHotkey
+class SetHotkey
 {
 public:
-	SwitchHotkey(int KEY, void(*HOTKEYFUNCTION)(), bool(*GETCHECK)())
-	{
-		key.HotKeyfuntion = HOTKEYFUNCTION;
-		key.status = -1;
-		key.key1 = KEY;
-		key.key2 = -1;
-		key.Getcheck = GETCHECK;
-		RHF = 0;
-		CH = 0;
-	}
-	SwitchHotkey(int KEY1, int KEY2, void(*HOTKEYFUNCTION)(), bool(*GETCHECK)())
+	SetHotkey(int KEY1, int KEY2, int MODE, void(*HOTKEYFUNCTION)(), bool(*GETCHECK)())
 	{
 		key.HotKeyfuntion = HOTKEYFUNCTION;
 		key.status = -1;
@@ -31,37 +27,61 @@ public:
 		key.key2 = KEY2;
 		key.Getcheck = GETCHECK;
 		RHF = 0;
-		CH = 0;
+		SHC = 0;
+		mode = MODE;
 	}
-	~SwitchHotkey()
+	SetHotkey(int KEY1, int MODE, void(*HOTKEYFUNCTION)(), bool(*GETCHECK)())
 	{
-		key.status = - 1;
+		key.HotKeyfuntion = HOTKEYFUNCTION;
+		key.status = -1;
+		key.key1 = KEY1;
+		key.key2 = -1;
+		key.Getcheck = GETCHECK;
+		RHF = 0;
+		SHC = 0;
+		mode = MODE;
+	}
+	~SetHotkey()
+	{
+		key.status = -1;
 		BYTE result = (BYTE)MapVirtualKey(key.key1, MAPVK_VK_TO_VSC);
 		keybd_event((BYTE)(key.key1), result, 0, 0);
 		keybd_event((BYTE)(key.key1), result, KEYEVENTF_KEYUP, 0);
 		CloseHandle(RHF);
-		CloseHandle(CH);
+		CloseHandle(SHC);
 	}
 	void run()
 	{
-		RHF = CreateThread(NULL, NULL, RunHotkeyFunction, (LPVOID)&key, NULL, NULL);
-		if (key.key2 == -1)
+		if (mode == 1 || mode == 2)
 		{
-			CH = CreateThread(NULL, NULL, CheckHotkey, (LPVOID)&key, NULL, NULL);
+			SHC = CreateThread(NULL, NULL, SwitchHotkeyCheck, (LPVOID)&key, NULL, NULL);
+			if (key.key2 == -1)
+			{
+				RHF = CreateThread(NULL, NULL, RunSwitchHotkey, (LPVOID)&key, NULL, NULL);
+			}
+			else
+			{
+				RHF = CreateThread(NULL, NULL, RunSwitchHotkey2, (LPVOID)&key, NULL, NULL);
+			}
 		}
-		else
+		else if (mode == 3)
 		{
-			CH = CreateThread(NULL, NULL, CheckHotkey2, (LPVOID)&key, NULL, NULL);
+			RHF = CreateThread(NULL, NULL, RunContinuousHotkey, (LPVOID)&key, NULL, NULL);
+		}
+		else if (mode == 4)
+		{
+			RHF = CreateThread(NULL, NULL, RunOnceHotkey, (LPVOID)&key, NULL, NULL);
 		}
 	}
 
 private:
-	_Hotkey_sturct key;
-	HANDLE RHF, CH;
+	int mode;
+	_Hotkey_struct key;
+	HANDLE RHF, SHC;
 
-	static DWORD WINAPI RunHotkeyFunction(LPVOID structkey)
+	static DWORD WINAPI SwitchHotkeyCheck(LPVOID structkey)
 	{
-		_Hotkey_sturct* key = (_Hotkey_sturct*)structkey;
+		_Hotkey_struct* key = (_Hotkey_struct*)structkey;
 		while (true)
 		{
 			if (key->status == 1)
@@ -74,9 +94,9 @@ private:
 		return NULL;
 	}
 
-	static DWORD WINAPI CheckHotkey(LPVOID structkey)
+	static DWORD WINAPI RunSwitchHotkey(LPVOID structkey)
 	{
-		_Hotkey_sturct* key = (_Hotkey_sturct*)structkey;
+		_Hotkey_struct* key = (_Hotkey_struct*)structkey;
 		MSG msg = { 0 };
 		HWND hConsole = GetActiveWindow();
 		while (true)
@@ -114,9 +134,9 @@ private:
 		return NULL;
 	}
 
-	static DWORD WINAPI CheckHotkey2(LPVOID structkey)
+	static DWORD WINAPI RunSwitchHotkey2(LPVOID structkey)
 	{
-		_Hotkey_sturct* key = (_Hotkey_sturct*)structkey;
+		_Hotkey_struct* key = (_Hotkey_struct*)structkey;
 		MSG msg = { 0 };
 		HWND hConsole = GetActiveWindow();
 		while (true)
@@ -160,39 +180,10 @@ private:
 		}
 		return NULL;
 	}
-};
 
-class OnceHotkey
-{
-public:
-	OnceHotkey(int KEY, void(*HOTKEYFUNCTION)(), bool(*GETCHECK)())
+	static DWORD WINAPI RunOnceHotkey(void* structkey)
 	{
-		key.HotKeyfuntion = HOTKEYFUNCTION;
-		key.status = -1;
-		key.key1 = KEY;
-		key.key2 = -1;
-		key.Getcheck = GETCHECK;
-		RHF = 0;
-	}
-	~OnceHotkey()
-	{
-		BYTE result = (BYTE)MapVirtualKey(key.key1, MAPVK_VK_TO_VSC);
-		keybd_event((BYTE)(key.key1), result, 0, 0);
-		keybd_event((BYTE)(key.key1), result, KEYEVENTF_KEYUP, 0);
-		CloseHandle(RHF);
-	}
-	void run()
-	{
-		RHF = CreateThread(NULL, NULL, RunHotkeyFunction, &key, NULL, NULL);
-	}
-
-private:
-	_Hotkey_sturct key;
-	HANDLE RHF;
-
-	static DWORD WINAPI RunHotkeyFunction(void* structkey)
-	{
-		_Hotkey_sturct* key = (_Hotkey_sturct*)structkey;
+		_Hotkey_struct* key = (_Hotkey_struct*)structkey;
 		MSG msg = { 0 };
 		HWND hConsole = GetActiveWindow();
 		while (true)
@@ -228,39 +219,10 @@ private:
 		}
 		return NULL;
 	}
-};
 
-class ContinuousHotkey
-{
-public:
-	ContinuousHotkey(int KEY, void(*HOTKEYFUNCTION)(), bool(*GETCHECK)())
+	static DWORD WINAPI RunContinuousHotkey(LPVOID structkey)
 	{
-		key.HotKeyfuntion = HOTKEYFUNCTION;
-		key.status = -1;
-		key.key1 = KEY;
-		key.key2 = -1;
-		key.Getcheck = GETCHECK;
-		RHF = 0;
-	}
-	~ContinuousHotkey()
-	{
-		BYTE result = (BYTE)MapVirtualKey(key.key1, MAPVK_VK_TO_VSC);
-		keybd_event((BYTE)(key.key1), result, 0, 0);
-		keybd_event((BYTE)(key.key1), result, KEYEVENTF_KEYUP, 0);
-		CloseHandle(RHF);
-	}
-	void run()
-	{
-		RHF = CreateThread(NULL, NULL, RunHotkeyFunction, (LPVOID)&key, NULL, NULL);
-	}
-
-private:
-	_Hotkey_sturct key;
-	HANDLE RHF;
-
-	static DWORD WINAPI RunHotkeyFunction(LPVOID structkey)
-	{
-		_Hotkey_sturct* key = (_Hotkey_sturct*)structkey;
+		_Hotkey_struct* key = (_Hotkey_struct*)structkey;
 		MSG msg = { 0 };
 		HWND hConsole = GetActiveWindow();
 		while (true)
@@ -278,7 +240,8 @@ private:
 						{
 						case 1:
 						case 2:
-							key->HotKeyfuntion(); break;
+							while (GetAsyncKeyState(key->key1)) { key->HotKeyfuntion(); }
+							break;
 						default:
 							break;
 						}

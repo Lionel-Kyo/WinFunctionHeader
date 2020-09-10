@@ -23,7 +23,14 @@ class Mziller
 public:
 	void outputText(string text)
 	{
-		for (int n = 0; n < text.length(); n++)
+		if ((GetKeyState(VK_CAPITAL) & 0x0001) != 0)
+		{
+			BYTE CAPITAL_code = (BYTE)MapVirtualKey(VK_CAPITAL, MAPVK_VK_TO_VSC);
+			keybd_event((BYTE)VK_CAPITAL, CAPITAL_code, 0, 0);
+			keybd_event((BYTE)VK_CAPITAL, CAPITAL_code, KEYEVENTF_KEYUP, 0);
+		}
+		int length = text.length();
+		for (int n = 0; n < length; n++)
 		{
 			BYTE scan_code, scan_shift;
 			DWORD vk = text[n];
@@ -172,7 +179,8 @@ public:
 
 		char* pData;
 		pData = (char*)GlobalLock(pClipData);
-		for (int i = 0; i < text.length(); i++)
+		int length = text.length();
+		for (int i = 0; i < length; i++)
 		{
 			pData[i] = text[i];
 		}

@@ -1,13 +1,14 @@
 ﻿#pragma once
-#include < tlhelp32.h >
-#include < tchar.h >
-#include < iomanip >
-#include < string >
+#include <tlhelp32.h>
+//#include <tchar.h>
+#include <iomanip>
+#include <string>
 #ifndef __AFXWIN_H__
-#include < Windows.h >
-#include < atlstr.h >
-#endif // !__AFXWIN_H__
-
+#include <Windows.h>
+#include <atlstr.h> //For CString
+#include <atlconv.h> //For output text
+#include <atlstr.h>//For output text
+#endif !// __AFXWIN_H__
 using namespace std;
 
 #define logbox(fmt, ...)\
@@ -21,150 +22,37 @@ AfxMessageBox(str);
 class Mziller
 {
 public:
-	void outputText(string text)
+	void outputText(CString text)
 	{
-		if ((GetKeyState(VK_CAPITAL) & 0x0001) != 0)
+		USES_CONVERSION;
+		wchar_t* data = T2W(text.GetBuffer(0));
+		int len = wcslen(data);
+
+		void(*sendUnicode)(wchar_t data) = [](wchar_t data)
 		{
-			BYTE CAPITAL_code = (BYTE)MapVirtualKey(VK_CAPITAL, MAPVK_VK_TO_VSC);
-			keybd_event((BYTE)VK_CAPITAL, CAPITAL_code, 0, 0);
-			keybd_event((BYTE)VK_CAPITAL, CAPITAL_code, KEYEVENTF_KEYUP, 0);
-		}
-		int length = text.length();
-		for (int n = 0; n < length; n++)
+			INPUT input[2];
+			memset(input, 0, 2 * sizeof(INPUT));
+
+			input[0].type = INPUT_KEYBOARD;
+			input[0].ki.wVk = 0;
+			input[0].ki.wScan = data;
+			input[0].ki.dwFlags = 0x4;//KEYEVENTF_UNICODE;
+
+			input[1].type = INPUT_KEYBOARD;
+			input[1].ki.wVk = 0;
+			input[1].ki.wScan = data;
+			input[1].ki.dwFlags = KEYEVENTF_KEYUP | 0x4;//KEYEVENTF_UNICODE;
+
+			SendInput(2, input, sizeof(INPUT));
+		};
+
+		for (int i = 0; i < len; i++)
 		{
-			BYTE scan_code, scan_shift;
-			DWORD vk = text[n];
-			bool shift = false;
-			if (vk >= 97 && vk <= 122) vk -= 32;
-			else if (vk >= 65 && vk <= 90)shift = true;
-			else if (vk == 45)vk = VK_OEM_MINUS;
-			else if (vk == 61)vk = VK_OEM_PLUS;
-			else if (vk == 91)vk = VK_OEM_4;
-			else if (vk == 93)vk = VK_OEM_6;
-			else if (vk == 92)vk = VK_OEM_5;
-			else if (vk == 59)vk = VK_OEM_1;
-			else if (vk == 39)vk = VK_OEM_7;
-			else if (vk == 44)vk = VK_OEM_COMMA;
-			else if (vk == 46)vk = VK_OEM_PERIOD;
-			else if (vk == 47)vk = VK_OEM_2;
-			else if (vk == 96)vk = VK_OEM_3;
-			else if (vk == 33)
-			{
-				vk = '1';
-				shift = true;
-			}
-			else if (vk == 64)
-			{
-				vk = '2';
-				shift = true;
-			}
-			else if (vk == 35)
-			{
-				vk = '3';
-				shift = true;
-			}
-			else if (vk == 36)
-			{
-				vk = '4';
-				shift = true;
-			}
-			else if (vk == 37)
-			{
-				vk = '5';
-				shift = true;
-			}
-			else if (vk == 94)
-			{
-				vk = '6';
-				shift = true;
-			}
-			else if (vk == 38)
-			{
-				vk = '7';
-				shift = true;
-			}
-			else if (vk == 42)
-			{
-				vk = '8';
-				shift = true;
-			}
-			else if (vk == 40)
-			{
-				vk = '9';
-				shift = true;
-			}
-			else if (vk == 41)
-			{
-				vk = '0';
-				shift = true;
-			}
-			else if (vk == 95)
-			{
-				vk = VK_OEM_MINUS;
-				shift = true;
-			}
-			else if (vk == 43)
-			{
-				vk = VK_OEM_PLUS;
-				shift = true;
-			}
-			else if (vk == 123)
-			{
-				vk = VK_OEM_4;
-				shift = true;
-			}
-			else if (vk == 125)
-			{
-				vk = VK_OEM_6;
-				shift = true;
-			}
-			else if (vk == 124)
-			{
-				vk = VK_OEM_5;
-				shift = true;
-			}
-			else if (vk == 58)
-			{
-				vk = VK_OEM_1;
-				shift = true;
-			}
-			else if (vk == 34)
-			{
-				vk = VK_OEM_7;
-				shift = true;
-			}
-			else if (vk == 60)
-			{
-				vk = VK_OEM_COMMA;
-				shift = true;
-			}
-			else if (vk == 62)
-			{
-				vk = VK_OEM_PERIOD;
-				shift = true;
-			}
-			else if (vk == 63)
-			{
-				vk = VK_OEM_2;
-				shift = true;
-			}
-			else if (vk == 126)
-			{
-				vk = VK_OEM_3;
-				shift = true;
-			}
-			if (shift)
-			{
-				scan_shift = (BYTE)MapVirtualKey(VK_LSHIFT, MAPVK_VK_TO_VSC);
-				keybd_event((BYTE)VK_LSHIFT, scan_shift, 0, 0);
-			}
-			scan_code = (BYTE)MapVirtualKey(vk, MAPVK_VK_TO_VSC);
-			keybd_event((BYTE)vk, scan_code, 0, 0);
-			keybd_event((BYTE)vk, scan_code, KEYEVENTF_KEYUP, 0);
-			if (shift)keybd_event((BYTE)VK_LSHIFT, scan_shift, KEYEVENTF_KEYUP, 0);
+			sendUnicode(data[i]);
 		}
 	}
-	void SetClipboard(std::string text)
+
+	void SetClipboard(string text)
 	{
 		HWND hWnd = GetClipboardOwner();
 
@@ -178,13 +66,14 @@ public:
 
 
 		char* pData;
+		if (pClipData == 0)return;
 		pData = (char*)GlobalLock(pClipData);
 		int length = text.length();
+		if (pData == NULL)return;
 		for (int i = 0; i < length; i++)
 		{
 			pData[i] = text[i];
 		}
-
 
 		GlobalUnlock(pClipData);
 
@@ -207,11 +96,12 @@ public:
 			HANDLE hCilpData = GetClipboardData(CF_TEXT);
 			char* pData;
 			pData = (char*)GlobalLock(hCilpData);
-			printf("Clipboard：%s", pData);
+			printf("Clipboard：%s\n", pData);
 			GlobalUnlock(hCilpData);
 		}
 		CloseClipboard();
 	}
+
 	POINT GetProcessCursor(HWND Hwnd)
 	{
 		POINT p;
@@ -309,6 +199,7 @@ public:
 		}
 		va_end(addresses);
 
+		if (lastAddress == 0)return;
 		::WriteProcessMemory(processHANDLE, (LPVOID)lastAddress, value, valueSize, NULL);
 	}
 
@@ -407,6 +298,7 @@ public:
 		}
 		va_end(addresses);
 
+		if (lastAddress == 0)return;
 		::WriteProcessMemory(processHANDLE, (LPVOID)lastAddress, value, valueSize, NULL);
 	}
 
@@ -485,53 +377,12 @@ public:
 		CloseHandle(SnapShot);
 		return NULL;
 	}
-	DWORD Cstr_dw(CString Cstr_x)
-	{
-		long long_x = _ttol(Cstr_x);  //CString to long
-		DWORD DWORD_x = (DWORD)long_x; // long to DWORD
-		return DWORD_x;
-	}
-	CString dw_Cstr(DWORD dw_x)
-	{
-		CString Cstr_x;
-		Cstr_x.Format(_T("%d"), dw_x);
-		return Cstr_x;
-	}
 	float dw_float(DWORD dw_x)
 	{
 		float flo_x = *reinterpret_cast<float*>(&dw_x);
 		return flo_x;
 	}
-	int Cstr_int(CString Cstr_x)
-	{
-		int int_x = _wtoi(Cstr_x);
-		return int_x;
-	}
-	double Cstr_dou(CString Cstr_x)
-	{
-		double dou_x = _wtof(Cstr_x);
-		return dou_x;
-	}
 
-	string Cstr_str(CString cstr)
-	{
-		string str(cstr.GetLength(), 'a');
-		for (int k = 0; k < cstr.GetLength(); k++)
-		{
-			str[k] = (char)cstr[k];
-		}
-		return str;
-	}
-	CString str_Cstr(string str)
-	{
-		CString cstr;
-		for (int k = 0; k < (int)str.length(); k++)
-		{
-			cstr += str[k];
-		}
-		//cstr.Format(_T("%s"), str);
-		return cstr;
-	}
 	string charp_str(char* charstar, int count)
 	{
 		string str(charstar, count);
@@ -546,15 +397,87 @@ public:
 			charp[k] = str[k];
 		}
 		charp[str_len] = '\0';
-		//char* charp = (char*)str.c_str();
 		return charp;
 	}
-	char* Cstr_charp(CString cstr)
+	DWORD Cstr_dw(CString Cstr_x)
 	{
-		string str = Cstr_str(cstr);
-		char* charp = str_charp(str);
+		long long_x = _ttol(Cstr_x);  //CString to long
+		DWORD DWORD_x = (DWORD)long_x; // long to DWORD
+		return DWORD_x;
+	}
+	CString dw_CStr(DWORD dw_x)
+	{
+		CString Cstr_x;
+		Cstr_x.Format(_T("%d"), dw_x);
+		return Cstr_x;
+	}
+	int CStr_int(CString Cstr_x)
+	{
+		int int_x = _wtoi(Cstr_x);
+		return int_x;
+	}
+	double CStr_dou(CString Cstr_x)
+	{
+		double dou_x = _wtof(Cstr_x);
+		return dou_x;
+	}
+
+	string CStr_str(CString cstr)
+	{
+		string str(cstr.GetLength(), 0);
+		for (int k = 0; k < cstr.GetLength(); k++)
+		{
+			str[k] = (char)cstr[k];
+		}
+		return str;
+	}
+	CString str_CStr(string str)
+	{
+		CString cstr;
+		int len = str.length();
+		for (int k = 0; k < len; k++)
+		{
+			cstr += str[k];
+		}
+		return cstr;
+	}
+	char* CStr_charp(CString cstr)
+	{
+		int len = cstr.GetLength();
+		char* charp = new char[len + 1];
+		for (int k = 0; k < len; k++)
+		{
+			charp[k] = (char)cstr[k];
+		}
+		charp[len] = '\0';
 		return charp;
 	}
+	string toString(CString cstr)
+	{
+#ifdef _UNICODE
+		USES_CONVERSION;
+		std::string str(W2A(cstr));
+		return str;
+#else
+		std::string str(cstr.GetBuffer());
+		cstr.ReleaseBuffer();
+		return str;
+#endif // _UNICODE 
+	}
+
+	CString toCString(string str)
+	{
+#ifdef _UNICODE
+		USES_CONVERSION;
+		CString cstr(str.c_str());
+		return cstr;
+#else
+		CString cstr;
+		cstr.Format("%s", str.c_str());
+		return cstr;
+#endif // _UNICODE  
+	}
+
 private:
 	BYTE scan_code(DWORD pKey)
 	{
